@@ -1,0 +1,143 @@
+"""
+    Implementation of hill climbing search and its variants.
+    author: Jawad Chowdhury.
+"""
+import random, copy
+
+class Board:
+    def __init__(self, n, state=None):
+        self.n = n
+        if state==None:
+            self.state = [['0' for c in range(n)] for r in range(n)]
+            for q in range(n):
+                r, c = random.randint(0,n-1), random.randint(0,n-1)
+                while self.state[r][c] != '0':
+                    r, c = random.randint(0, n - 1), random.randint(0, n - 1)
+                self.state[r][c] = 'Q'
+        else:
+            self.state=state
+        self.hcost = self.get_hcost()
+    def get_hvcost(self):
+        hvcost = 0
+        for r in range(self.n):
+            for c in range(self.n):
+                if self.state[r][c] == 'Q':
+                    for t in range(self.n):
+                        if self.state[r][t] == "Q":
+                            hvcost += 1
+                        if self.state[t][c] == "Q":
+                            hvcost += 1
+                    hvcost = hvcost -2
+        hvcost = hvcost/2
+        return hvcost
+    def get_dcost(self):
+        dcost = 0
+        for r in range(self.n):
+            for c in range(self.n):
+                if self.state[r][c] == 'Q':
+                    tr, tc = r - 1, c - 1
+                    while tr >= 0 and tc >= 0:
+                        if self.state[tr][tc] == "Q":
+                            dcost += 1
+                        tr -= 1
+                        tc -= 1
+                    tr, tc = r + 1, c - 1
+                    while tr < self.n and tc >= 0:
+                        if self.state[tr][tc] == "Q":
+                            dcost += 1
+                        tr += 1
+                        tc -= 1
+                    tr, tc = r + 1, c + 1
+                    while tr < self.n and tc < self.n:
+                        if self.state[tr][tc] == "Q":
+                            dcost += 1
+                        tr += 1
+                        tc += 1
+                    tr, tc = r - 1, c + 1
+                    while tr >= 0 and tc < self.n:
+                        if self.state[tr][tc] == "Q":
+                            dcost += 1
+                        tr -= 1
+                        tc += 1
+        dcost = dcost/2
+        return dcost
+    def get_hcost(self):
+        hvcost = self.get_hvcost()
+        dcost = self.get_dcost()
+        hcost = hvcost + dcost
+        return hcost
+    def __str__(self):
+        s=''
+        for r in range(self.n):
+            for c in range(self.n):
+                s += str(self.state[r][c]) + ' '
+            s += '\n'
+        return s
+
+class NQueen:
+    def __init__(self, no_runs, n, variant='basic'):
+        self.no_runs = no_runs
+        self.n = n
+        self.variant = variant
+        self.no_success = 0
+        self.no_total_steps = 0
+    def run(self):
+        for i in range(0, self.no_runs):
+            print('==========     BOARD :%s    =========='%(i,) )
+            b = Board(n=n)
+            self.hill_climbing(variant=self.variant, board=b)
+    def get_best_neighbor(self, board):
+        best_board = board
+        best_cost = board.hcost
+        for r in range(0,self.n):
+            for c in range(0,self.n):
+                if board.state[r][c] == 'Q':
+                    for nr in range(0,self.n):
+                        for nc in range(0,self.n):
+                            if board.state[nr][nc] == '0':
+                                neighbor_state = copy.deepcopy(board.state)
+                                neighbor_state[r][c] = '0'
+                                neighbor_state[nr][nc] = 'Q'
+                                neighbor = Board(n=self.n, state=neighbor_state)
+                                if neighbor.hcost < best_cost:
+                                    best_cost = neighbor.hcost
+                                    best_board = neighbor
+        return best_board, best_cost
+    def hill_climbing(self, variant='basic', board=None):
+        if board and variant == 'basic':
+            current_board = board
+            while True:
+                best_neighbor, _ = self.get_best_neighbor(current_board)
+                if current_board.hcost == best_neighbor.hcost:
+                    break
+                self.no_total_steps += 1
+                current_board = best_neighbor
+            if best_neighbor.hcost != 0:
+                print('SOLUTION NOT FOUND!!!')
+            else:
+                print ('SOLUTION FOUND!!!')
+                self.no_success += 1
+
+if __name__ == "__main__":
+    print('Hill Climbing Search (Basic)!!!')
+    input_file_name = 'input.txt'
+    with open(input_file_name) as f:
+        lines = f.readlines()
+        values = [line.replace('\n', '').replace(' ', '') for line in lines]
+        values = [int(v) for v in values]
+    n = values[0]
+    no_run = values[1]
+    nq_basic = NQueen(no_runs=no_run, n=n, variant='basic')
+    nq_basic.run()
+    print()
+    nr = nq_basic.no_runs
+    ns = nq_basic.no_success
+    rs = (ns/nr)*100
+    nf = nr-ns
+    rf = (nf/nr)*100
+    print('No of Total Runs : %s'%(nr) )
+    print('No of Total Success : %s'%(ns) )
+    print('Success Rate: %s %s'%(rs,'%') )
+    print('No of Total Failure : %s'%(nf) )
+    print('Failure Rate: %s %s'%(rf,'%') )
+
