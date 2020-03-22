@@ -77,24 +77,25 @@ class Board:
         return s
 
 class NQueen:
-    def __init__(self, no_runs, n, variant='sideway'):
+    def __init__(self, no_runs, n, variant='random_restart_sideway'):
         self.no_runs = no_runs
         self.n = n
         self.variant = variant
         self.no_success = 0
         self.no_total_steps = 0
+        self.no_random_restart = 0
         self.no_success_steps = 0
-    def run(self, limit_sideway=100):
+    def run(self, limit_random_restart_sideway=100):
         for i in range(0, self.no_runs):
             print()
             print('==========     BOARD :%s    =========='%(i,) )
             b = Board(n=n)
-            self.hill_climbing(variant=self.variant, board=b, limit_sideway=limit_sideway)
-    def get_best_neighbor(self, board, allow_sideway=False):
+            self.hill_climbing(variant=self.variant, board=b, limit_random_restart_sideway=limit_random_restart_sideway)
+    def get_best_neighbor(self, board, allow_random_restart_sideway=False):
         u=False
         best_board = board
         best_cost = board.hcost
-        if allow_sideway:
+        if allow_random_restart_sideway:
             list_indexQ = []
             list_indexBlank = []
             for r in range(0,self.n):
@@ -134,42 +135,48 @@ class NQueen:
                                         best_cost = neighbor.hcost
                                         best_board = neighbor
         return best_board, u
-    def hill_climbing(self, variant='sideway', board=None, limit_sideway=100):
-        if board and variant == 'sideway':
+    def hill_climbing(self, variant='random_restart_sideway', board=None, limit_random_restart_sideway=100):
+        if board and variant == 'random_restart_sideway':
             current_board = board
+            no_local_restart = 0
             no_local_steps = 0
-            while current_board.hcost != 0:
-                print(current_board)
-                best_neighbor, _ = self.get_best_neighbor(current_board, allow_sideway=False)
-                if best_neighbor.hcost < current_board.hcost:
-                    current_board = best_neighbor
-                    no_local_steps += 1
-                else:
-                    counter_sideway = 0
-                    updated = True
-                    while (best_neighbor.hcost >= current_board.hcost) and counter_sideway <=limit_sideway:
-                        print(current_board)
+            success = False
+            while not success:
+                while current_board.hcost != 0:
+                    print(current_board)
+                    best_neighbor, _ = self.get_best_neighbor(current_board, allow_random_restart_sideway=False)
+                    if best_neighbor.hcost < current_board.hcost:
                         current_board = best_neighbor
                         no_local_steps += 1
-                        counter_sideway +=1
-                        best_neighbor, updated = self.get_best_neighbor(current_board, allow_sideway=True)
-                        if not updated:
+                    else:
+                        counter_random_restart_sideway = 0
+                        updated = True
+                        while (best_neighbor.hcost == current_board.hcost) and counter_random_restart_sideway <=limit_random_restart_sideway:
+                            print(current_board)
+                            current_board = best_neighbor
+                            no_local_steps += 1
+                            counter_random_restart_sideway +=1
+                            best_neighbor, updated = self.get_best_neighbor(current_board, allow_random_restart_sideway=True)
+                            if not updated:
+                                break
+                        if counter_random_restart_sideway > limit_random_restart_sideway or not updated:
                             break
-                    if counter_sideway > limit_sideway or not updated:
-                        break
-                    current_board = best_neighbor
-            print(current_board)
-            if current_board.hcost != 0:
-                print('SOLUTION NOT FOUND!!!')
-                self.no_total_steps += no_local_steps
-            else:
-                print ('SOLUTION FOUND!!!')
-                self.no_success += 1
-                self.no_success_steps += no_local_steps
-                self.no_total_steps += no_local_steps
+                        current_board = best_neighbor
+                if current_board.hcost == 0 :
+                    success = True
+                    print(current_board)
+                    print ('SOLUTION FOUND!!!')
+                else:
+                    print ('RESTARTING!!!')
+                    no_local_restart+=1
+                    current_board = Board(n=self.n)
+            self.no_success += 1
+            self.no_total_steps += no_local_steps
+            self.no_success_steps += no_local_steps
+            self.no_random_restart += no_local_restart
 
 if __name__ == "__main__":
-    print('Hill Climbing Search (sideway)!!!')
+    print('Hill Climbing Search (random_restart_sideway)!!!')
     input_file_name = 'input.txt'
     with open(input_file_name) as f:
         lines = f.readlines()
@@ -177,22 +184,27 @@ if __name__ == "__main__":
         values = [int(v) for v in values]
     n = values[0]
     no_run = values[1]
-    nq_sideway = NQueen(no_runs=no_run, n=n, variant='sideway')
-    nq_sideway.run(limit_sideway=100)
+    nq_random_restart_sideway = NQueen(no_runs=no_run, n=n, variant='random_restart_sideway')
+    nq_random_restart_sideway.run(limit_random_restart_sideway=100)
     print()
-    nr = nq_sideway.no_runs
-    ns = nq_sideway.no_success
+    nr = nq_random_restart_sideway.no_runs
+    ns = nq_random_restart_sideway.no_success
     rs = (ns/nr)*100
     nf = nr-ns
     rf = (nf/nr)*100
-    n_total_steps = nq_sideway.no_total_steps
-    n_success_steps = nq_sideway.no_success_steps
+    n_total_steps = nq_random_restart_sideway.no_total_steps
+    n_success_steps = nq_random_restart_sideway.no_success_steps
     n_failure_steps = n_total_steps - n_success_steps
     avg_steps_success = n_success_steps/ns if ns != 0 else 0
     avg_steps_failure = n_failure_steps/nf if nf != 0 else 0
-    print('No of Total Runs: {:.2f}'.format(nr) )
-    print('Success Rate: {:.2f} %'.format(rs) )
-    print('Failure Rate: {:.2f} %'.format(rf) )
-    print('Avg steps at Success: {:.2f} '.format(avg_steps_success) )
-    print('Avg steps at Failure: {:.2f} '.format(avg_steps_failure) )
+    # print('No of Total Runs: {:.2f}'.format(nr) )
+    # print('Success Rate: {:.2f} %'.format(rs) )
+    # print('Failure Rate: {:.2f} %'.format(rf) )
+    # print('Avg steps at Success: {:.2f} '.format(avg_steps_success) )
+    # print('Avg steps at Failure: {:.2f} '.format(avg_steps_failure) )
+    n_random_restart = nq_random_restart_sideway.no_random_restart
+    avg_random_restart = n_random_restart/nr if nr != 0 else 0
+    avg_steps = n_total_steps/nr if nr != 0 else 0
+    print('Avg random restart: {:.2f} '.format(avg_random_restart) )
+    print('Avg steps: {:.2f} '.format(avg_steps) )
 
