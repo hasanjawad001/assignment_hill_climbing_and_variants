@@ -87,6 +87,7 @@ class NQueen:
         self.no_success_steps = 0
     def run(self, limit_random_restart_sideway=100):
         for i in range(0, self.no_runs):
+            self.no_random_restart +=1
             print()
             print('==========     BOARD :%s    =========='%(i,) )
             b = Board(n=n)
