@@ -8,10 +8,10 @@ class Board:
     def __init__(self, n, state=None):
         self.n = n
         if state==None:
-            self.state = [['0' for c in range(n)] for r in range(n)]
+            self.state = [['_' for c in range(n)] for r in range(n)]
             for q in range(n):
                 r, c = random.randint(0,n-1), random.randint(0,n-1)
-                while self.state[r][c] != '0':
+                while self.state[r][c] != '_':
                     r, c = random.randint(0, n - 1), random.randint(0, n - 1)
                 self.state[r][c] = 'Q'
         else:
@@ -72,6 +72,8 @@ class Board:
             for c in range(self.n):
                 s += str(self.state[r][c]) + ' '
             s += '\n'
+        s += str('hcost') + ' : ' + str(self.hcost)
+        s += '\n'
         return s
 
 class NQueen:
@@ -84,6 +86,7 @@ class NQueen:
         self.no_success_steps = 0
     def run(self):
         for i in range(0, self.no_runs):
+            print()
             print('==========     BOARD :%s    =========='%(i,) )
             b = Board(n=n)
             self.hill_climbing(variant=self.variant, board=b)
@@ -95,9 +98,9 @@ class NQueen:
                 if board.state[r][c] == 'Q':
                     for nr in range(0,self.n):
                         for nc in range(0,self.n):
-                            if board.state[nr][nc] == '0':
+                            if board.state[nr][nc] == '_':
                                 neighbor_state = copy.deepcopy(board.state)
-                                neighbor_state[r][c] = '0'
+                                neighbor_state[r][c] = '_'
                                 neighbor_state[nr][nc] = 'Q'
                                 neighbor = Board(n=self.n, state=neighbor_state)
                                 if neighbor.hcost < best_cost:
@@ -109,6 +112,7 @@ class NQueen:
             current_board = board
             no_local_steps = 0
             while True:
+                print(current_board)
                 best_neighbor, _ = self.get_best_neighbor(current_board)
                 if current_board.hcost == best_neighbor.hcost:
                     break
@@ -121,6 +125,7 @@ class NQueen:
                 print ('SOLUTION FOUND!!!')
                 self.no_success += 1
                 self.no_success_steps += no_local_steps
+                self.no_total_steps += no_local_steps
 
 if __name__ == "__main__":
     print('Hill Climbing Search (Basic)!!!')
@@ -142,8 +147,8 @@ if __name__ == "__main__":
     n_total_steps = nq_basic.no_total_steps
     n_success_steps = nq_basic.no_success_steps
     n_failure_steps = n_total_steps - n_success_steps
-    avg_steps_success = n_success_steps/ns
-    avg_steps_failure = n_failure_steps/nf
+    avg_steps_success = n_success_steps/ns if ns != 0 else 0
+    avg_steps_failure = n_failure_steps/nf if nf != 0 else 0
     print('No of Total Runs: {:.2f}'.format(nr) )
     print('Success Rate: {:.2f} %'.format(rs) )
     print('Failure Rate: {:.2f} %'.format(rf) )
