@@ -153,6 +153,7 @@ class NQueen:
                         best_neighbor, _ = self.get_best_neighbor(current_board, allow_sideway=True)
                     if counter_sideway > limit_sideway:
                         break
+            print(current_board)
             if current_board.hcost != 0:
                 print('SOLUTION NOT FOUND!!!')
                 self.no_total_steps += no_local_steps
@@ -163,7 +164,7 @@ class NQueen:
                 self.no_total_steps += no_local_steps
 
 if __name__ == "__main__":
-    print('Hill Climbing Search (Basic)!!!')
+    print('Hill Climbing Search (sideway)!!!')
     input_file_name = 'input.txt'
     with open(input_file_name) as f:
         lines = f.readlines()

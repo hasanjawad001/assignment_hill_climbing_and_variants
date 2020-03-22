@@ -118,6 +118,7 @@ class NQueen:
                     break
                 no_local_steps += 1
                 current_board = best_neighbor
+            print(best_neighbor)
             if best_neighbor.hcost != 0:
                 print('SOLUTION NOT FOUND!!!')
                 self.no_total_steps += no_local_steps
@@ -128,7 +129,7 @@ class NQueen:
                 self.no_total_steps += no_local_steps
 
 if __name__ == "__main__":
-    print('Hill Climbing Search (Basic)!!!')
+    print('Hill Climbing Search (basic)!!!')
     input_file_name = 'input.txt'
     with open(input_file_name) as f:
         lines = f.readlines()
