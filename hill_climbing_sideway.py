@@ -5,6 +5,9 @@
 import random, copy
 
 class Board:
+    """
+    This class maintains properties related to the different state of the N-Queen Problem.
+    """
     def __init__(self, n, state=None):
         self.n = n
         if state==None:
@@ -62,11 +65,19 @@ class Board:
         dcost = dcost/2
         return dcost
     def get_hcost(self):
+        """
+        This method is being used to calculate the heuristic cost of the current board.
+        :return:
+        """
         hvcost = self.get_hvcost()
         dcost = self.get_dcost()
         hcost = hvcost + dcost
         return hcost
     def __str__(self):
+        """
+        String representation of the state.
+        :return:
+        """
         s=''
         for r in range(self.n):
             for c in range(self.n):
@@ -77,6 +88,9 @@ class Board:
         return s
 
 class NQueen:
+    """
+    This class is being used to maintain the overall flow of the N-Queen problem.
+    """
     def __init__(self, no_runs, n, variant='sideway'):
         self.no_runs = no_runs
         self.n = n
@@ -91,6 +105,11 @@ class NQueen:
             b = Board(n=n)
             self.hill_climbing(variant=self.variant, board=b, limit_sideway=limit_sideway)
     def get_best_neighbor(self, board, allow_sideway=False):
+        """
+        This method gives the best successor based on the strategy.
+        :param board:
+        :return:
+        """
         u=False
         best_board = board
         best_cost = board.hcost
@@ -135,6 +154,12 @@ class NQueen:
                                         best_board = neighbor
         return best_board, u
     def hill_climbing(self, variant='sideway', board=None, limit_sideway=100):
+        """
+        This method runs the hill climbing algorithm based on the variant.
+        :param variant:
+        :param board:
+        :return:
+        """
         if board and variant == 'sideway':
             current_board = board
             no_local_steps = 0
@@ -175,8 +200,8 @@ if __name__ == "__main__":
         lines = f.readlines()
         values = [line.replace('\n', '').replace(' ', '') for line in lines]
         values = [int(v) for v in values]
-    n = values[0]
-    no_run = values[1]
+    n = values[0] # value of n
+    no_run = values[1] # value of number of runs.
     nq_sideway = NQueen(no_runs=no_run, n=n, variant='sideway')
     nq_sideway.run(limit_sideway=100)
     print()
